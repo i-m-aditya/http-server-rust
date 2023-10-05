@@ -80,7 +80,8 @@ fn handle_client(mut stream: TcpStream) {
     // Respond to the client (you would handle the request here)
 }
 
-fn main() -> Result<(), Error> {
+#[tokio::main]
+async fn main() -> Result<(), Error> {
     // You can use print statements as follows for debugging, they'll be visible when running tests.
     println!("Logs from your program will appear here!");
 
@@ -92,11 +93,11 @@ fn main() -> Result<(), Error> {
         match stream {
             Ok(stream) => {
                 println!("accepted new connection");
-                handle_client(stream);
 
-                // stream
-                //     .write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes())
-                //     .unwrap()
+                tokio::spawn(async move {
+                    println!("Accepted new connection");
+                    handle_client(stream);
+                });
             }
             Err(e) => {
                 println!("error: {}", e);
