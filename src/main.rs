@@ -16,7 +16,7 @@ fn handle_client(mut stream: TcpStream) {
         let request_parts: Vec<&str> = request_line.trim().split(' ').collect();
         if request_parts.len() >= 2 {
             // let method = request_parts[0];
-            let mut path = request_parts[1];
+            let path = request_parts[1];
 
             match path {
                 "/" => {
@@ -30,6 +30,25 @@ fn handle_client(mut stream: TcpStream) {
                         "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: {}\r\n\r\n{}",
                         echo_str.len(),
                         echo_str
+                    );
+                    stream.write_all(response.as_bytes()).unwrap();
+                    stream.flush().unwrap();
+                }
+                p if p.starts_with("/user-agent") => {
+                    // println!("Hello");
+                    let mut recursive_s = String::new();
+                    while recursive_s.starts_with("User") == false {
+                        recursive_s.clear();
+                        reader.read_line(&mut recursive_s).expect("Read next line");
+                        // println!("Recursive : {}", recursive_s);
+                    }
+                    let user_agent_parts: Vec<&str> = recursive_s.trim().split(":").collect();
+                    let user_agent_val = user_agent_parts[1].trim();
+                    println!("User agent val: {}", user_agent_val);
+                    let response = format!(
+                        "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-length: {}\r\n\r\n{}",
+                        user_agent_val.len(),
+                        user_agent_val
                     );
                     stream.write_all(response.as_bytes()).unwrap();
                     stream.flush().unwrap();
